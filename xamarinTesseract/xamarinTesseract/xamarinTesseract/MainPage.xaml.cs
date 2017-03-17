@@ -1,7 +1,9 @@
 ﻿using Ninject;
+using Plugin.Media;
 using Plugin.Media.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +18,8 @@ namespace xamarinTesseract
 
         private readonly IProcessAssert _processAssert;
 
+        //private string _path = "img/1.png";
+
         public MainPage()
         {
             InitializeComponent();
@@ -24,44 +28,63 @@ namespace xamarinTesseract
 
             _processAssert = NinjectIoC.Container.Get<IProcessAssert>();
 
+            //img.Source = ImageSource.FromStream(() => { return _processAssert.GetStreamByPath(_path); });
+
             btn_submit.Clicked += Click;
         }
 
         private async void Click(object sender, EventArgs e)
         {
-            
-            await Recognise("img/tekcent.png");
+            string uuid = Guid.NewGuid().ToString();
+
+            var file = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions()
+            {
+                PhotoSize = PhotoSize.Small,
+                //CustomPhotoSize = 80
+            });
+
+            if (file == null)
+                return;
+
+            //img.Source = ImageSource.FromStream(() =>
+            //{
+            //    var stream = file.GetStream();
+            //    file.Dispose();
+            //    return stream;
+            //});
+
+            //byte[] imageAsBytes = null;
+            //using (var memoryStream = new MemoryStream())
+            //{
+            //    file.GetStream().CopyTo(memoryStream);
+            //    file.Dispose();
+            //    imageAsBytes = memoryStream.ToArray();
+            //}
+
+
+            await Recognise(file.GetStream());
         }
 
-        public async Task Recognise(string path)
+        public async Task Recognise(Stream stream)
         {
-            try
+            if (!_tesseract.Initialized)
             {
-                if (!_tesseract.Initialized)
-                {
-                    var initialised = await _tesseract.Init("eng");
-                    if (!initialised)
-                        return;
-                }
-
-                var stream = _processAssert.GetStreamByPath(path);
-
-                if (!await _tesseract.SetImage(stream))
-                {
-                    
-                }
-                
-                string text1 = _tesseract.Text;
-                var words = _tesseract.Results(PageIteratorLevel.Word);
-                var symbols = _tesseract.Results(PageIteratorLevel.Symbol);
-                var blocks = _tesseract.Results(PageIteratorLevel.Block);
-                var paragraphs = _tesseract.Results(PageIteratorLevel.Paragraph);
-                var lines = _tesseract.Results(PageIteratorLevel.Textline);
+                var initialised = await _tesseract.Init("eng");
+                if (!initialised)
+                    return;
             }
-            catch (Exception ex)
+
+            if (!await _tesseract.SetImage(stream))
             {
-
+                //TO DO Wrong image
             }
+
+            lbl_text.Text = _tesseract.Text;
+            var words = _tesseract.Results(PageIteratorLevel.Word);
+            var symbols = _tesseract.Results(PageIteratorLevel.Symbol);
+            var blocks = _tesseract.Results(PageIteratorLevel.Block);
+            var paragraphs = _tesseract.Results(PageIteratorLevel.Paragraph);
+            var lines = _tesseract.Results(PageIteratorLevel.Textline);
         }
     }
 }

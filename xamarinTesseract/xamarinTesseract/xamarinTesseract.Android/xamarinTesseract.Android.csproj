@@ -145,6 +145,7 @@
     <AndroidAsset Include="Assets\tessdata\eng.cube.word-freq" />
     <AndroidAsset Include="Assets\tessdata\eng.tesseract_cube.nn" />
     <AndroidAsset Include="Assets\tessdata\eng.traineddata" />
+    <AndroidAsset Include="Assets\tessdata\vie.traineddata" />
     <None Include="packages.config" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
@@ -169,7 +170,9 @@
       <Name>xamarinTesseract</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <AndroidAsset Include="Assets\img\1.png" />
+  </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\img\tekcent.png" />
   </ItemGroup>
